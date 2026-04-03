@@ -1,0 +1,111 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - SPLASH</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <span>SPLASH</span>
+            </div>
+            <div class="user-info">
+                <span>{{ user.username }} - Administrador</span>
+                <a href="{% url 'pos:logout' %}" class="btn-logout">Cerrar Sesión</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="admin-container">
+        <div class="admin-header">
+            <h1>📊 Panel de Administración</h1>
+            <nav class="admin-nav">
+                <a href="{% url 'pos:admin_dashboard' %}" class="active">Dashboard</a>
+                <a href="{% url 'pos:admin_ventas' %}">💰 Ventas</a>
+                <a href="{% url 'pos:admin_productos' %}">📦 Inventario</a>
+                <a href="{% url 'pos:admin_config' %}">⚙️ Configuración</a>
+            </nav>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">${{ total_ventas_hoy|floatformat:2 }}</div>
+                <div class="stat-label">Ventas de Hoy</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-number">{{ cantidad_ventas_hoy }}</div>
+                <div class="stat-label">Transacciones Hoy</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-number">${{ total_ventas_mes|floatformat:2 }}</div>
+                <div class="stat-label">Ventas del Mes</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-number">{{ cantidad_ventas_mes }}</div>
+                <div class="stat-label">Transacciones del Mes</div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <h2>🏆 Productos Más Vendidos (Este Mes)</h2>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Unidades Vendidas</th>
+                        <th>Ingresos</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for producto in productos_mas_vendidos %}
+                        <tr>
+                            <td>{{ producto.producto__nombre }}</td>
+                            <td>{{ producto.total_vendido }}</td>
+                            <td>${{ producto.total_ingresos|floatformat:2 }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="3" style="text-align: center;">No hay ventas este mes</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="table-container" style="margin-top: 2rem;">
+            <h2>🕒 Ventas Recientes</h2>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Ticket</th>
+                        <th>Fecha</th>
+                        <th>Cajero</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for venta in ventas_recientes %}
+                        <tr>
+                            <td><a href="{% url 'pos:ticket' venta.id %}" target="_blank">#{{ venta.id }}</a></td>
+                            <td>{{ venta.fecha|date:"d/m/Y H:i" }}</td>
+                            <td>{{ venta.usuario.username }}</td>
+                            <td>${{ venta.total }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="4" style="text-align: center;">No hay ventas recientes</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+</body>
+</html>

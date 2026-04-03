@@ -1,0 +1,59 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket #{{ venta.id }} - SPLASH Heladería</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <div class="ticket-container">
+        <div class="ticket-header">
+            <div class="logo">🍦 SPLASH</div>
+            <h1>Heladería</h1>
+            <p>Ticket de Venta</p>
+        </div>
+        
+        <div class="ticket-info">
+            <p><strong>No. Ticket:</strong> #{{ venta.id }}</p>
+            <p><strong>Fecha:</strong> {{ venta.fecha|date:"d/m/Y H:i" }}</p>
+            <p><strong>Cajero:</strong> {{ venta.usuario.username }}</p>
+            <p><strong>Método:</strong> {{ venta.get_metodo_pago_display }}</p>
+        </div>
+        
+        <div class="ticket-items">
+            <h3>Productos</h3>
+            {% for detalle in detalles %}
+                <div class="ticket-item">
+                    <div>
+                        <strong>{{ detalle.cantidad }}x {{ detalle.producto.nombre }}</strong><br>
+                        <small>${{ detalle.precio_unitario }} c/u</small>
+                    </div>
+                    <div>
+                        <strong>${{ detalle.subtotal }}</strong>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <div class="ticket-total">
+            <strong>TOTAL: ${{ venta.total }}</strong>
+        </div>
+        
+        <div style="margin-top: 2rem; text-align: center; color: #6c757d;">
+            <p>¡Gracias por tu compra!</p>
+            <p>🍦 SPLASH - El mejor helado</p>
+        </div>
+        
+        <div style="margin-top: 2rem; text-align: center;">
+            <button onclick="printTicket()" class="btn-pagar" style="margin-right: 1rem;">
+                🖨️ Imprimir
+            </button>
+            <button onclick="window.close()" class="btn-vaciar">
+                Cerrar
+            </button>
+        </div>
+    </div>
+</body>
+</html>

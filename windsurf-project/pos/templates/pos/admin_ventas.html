@@ -1,0 +1,113 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ventas - Administración SPLASH</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <span>SPLASH</span>
+            </div>
+            <div class="user-info">
+                <span>{{ user.username }} - Administrador</span>
+                <a href="{% url 'pos:logout' %}" class="btn-logout">Cerrar Sesión</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="admin-container">
+        <div class="admin-header">
+            <h1>💰 Gestión de Ventas</h1>
+            <nav class="admin-nav">
+                <a href="{% url 'pos:admin_dashboard' %}">Dashboard</a>
+                <a href="{% url 'pos:admin_ventas' %}" class="active">💰 Ventas</a>
+                <a href="{% url 'pos:admin_productos' %}">📦 Inventario</a>
+                <a href="{% url 'pos:admin_config' %}">⚙️ Configuración</a>
+            </nav>
+        </div>
+
+        <div class="table-container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <h2>📋 Historial de Ventas</h2>
+                    <p>Total: <strong>${{ total_ventas|floatformat:2 }}</strong> en <strong>{{ cantidad_ventas }}</strong> ventas</p>
+                </div>
+                
+                <form method="get" style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                    <input type="date" name="fecha_inicio" value="{{ fecha_inicio }}" placeholder="Fecha inicio">
+                    <input type="date" name="fecha_fin" value="{{ fecha_fin }}" placeholder="Fecha fin">
+                    <button type="submit" class="btn-login" style="padding: 0.5rem 1rem;">Filtrar</button>
+                    <a href="{% url 'pos:admin_ventas' %}" class="btn-vaciar" style="padding: 0.5rem 1rem; text-decoration: none;">Limpiar</a>
+                </form>
+            </div>
+            
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Ticket</th>
+                        <th>Fecha</th>
+                        <th>Cajero</th>
+                        <th>Productos</th>
+                        <th>Total</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for venta in page_obj %}
+                        <tr>
+                            <td><strong>#{{ venta.id }}</strong></td>
+                            <td>{{ venta.fecha|date:"d/m/Y H:i" }}</td>
+                            <td>{{ venta.usuario.username }}</td>
+                            <td>{{ venta.detalles.count }} productos</td>
+                            <td><strong>${{ venta.total }}</strong></td>
+                            <td>
+                                <a href="{% url 'pos:ticket' venta.id %}" target="_blank" class="btn-login" style="padding: 0.25rem 0.5rem; text-decoration: none; font-size: 0.8rem;">
+                                    🧾 Ticket
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" style="text-align: center;">
+                                {% if fecha_inicio or fecha_fin %}
+                                    No hay ventas en el período seleccionado
+                                {% else %}
+                                    No hay ventas registradas
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <!-- Paginación -->
+            {% if page_obj.has_other_pages %}
+                <div style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap;">
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1{% if fecha_inicio %}&fecha_inicio={{ fecha_inicio }}{% endif %}{% if fecha_fin %}&fecha_fin={{ fecha_fin }}{% endif %}" 
+                           class="btn-vaciar" style="padding: 0.5rem 1rem; text-decoration: none;">« Primera</a>
+                        <a href="?page={{ page_obj.previous_page_number }}{% if fecha_inicio %}&fecha_inicio={{ fecha_inicio }}{% endif %}{% if fecha_fin %}&fecha_fin={{ fecha_fin }}{% endif %}" 
+                           class="btn-vaciar" style="padding: 0.5rem 1rem; text-decoration: none;">‹ Anterior</a>
+                    {% endif %}
+                    
+                    <span style="padding: 0.5rem 1rem; background: var(--splash-blue-dark); color: white; border-radius: 5px;">
+                        Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                    </span>
+                    
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}{% if fecha_inicio %}&fecha_inicio={{ fecha_inicio }}{% endif %}{% if fecha_fin %}&fecha_fin={{ fecha_fin }}{% endif %}" 
+                           class="btn-vaciar" style="padding: 0.5rem 1rem; text-decoration: none;">Siguiente ›</a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}{% if fecha_inicio %}&fecha_inicio={{ fecha_inicio }}{% endif %}{% if fecha_fin %}&fecha_fin={{ fecha_fin }}{% endif %}" 
+                           class="btn-vaciar" style="padding: 0.5rem 1rem; text-decoration: none;">Última »</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </main>
+</body>
+</html>

@@ -1,0 +1,98 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POS - SPLASH Heladería</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <span>SPLASH</span>
+            </div>
+            <div class="user-info">
+                <span>{{ user.username }} - {{ user.get_rol_display }}</span>
+                <a href="{% url 'pos:logout' %}" class="btn-logout">Cerrar Sesión</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="pos-container">
+        <section class="productos-section">
+            <div style="background: var(--splash-red); color: white; padding: 1rem; border-radius: 10px; margin-bottom: 1rem; text-align: center;">
+                🛒 Punto de Venta - Solo para registro de ventas
+            </div>
+            
+            <div class="search-bar">
+                <input type="text" id="search-input" placeholder="🔍 Buscar productos...">
+            </div>
+            
+            <div class="productos-grid">
+                {% for producto in productos %}
+                    <div class="producto-card {% if producto.stock == 0 %}agotado{% endif %}" 
+                         data-producto-id="{{ producto.id }}">
+                        <div class="producto-imagen">
+                            {% if producto.tipo == 'helado' %}🍦
+                            {% elif producto.tipo == 'frozen_yogurt' %}🍨
+                            {% elif producto.tipo == 'paleta' %}🍧
+                            {% elif producto.tipo == 'malteada' %}🥤
+                            {% elif producto.tipo == 'bebida' %}🧃
+                            {% else %}🍦{% endif %}
+                        </div>
+                        <div class="producto-nombre">{{ producto.nombre }}</div>
+                        <div class="producto-precio">${{ producto.precio }}</div>
+                        <div class="producto-stock">
+                            {% if producto.stock == 0 %}
+                                Agotado
+                            {% else %}
+                                Stock: {{ producto.stock }}
+                            {% endif %}
+                        </div>
+                    </div>
+                {% empty %}
+                    <div style="grid-column: 1/-1; text-align: center; padding: 2rem;">
+                        <h3>No hay productos disponibles</h3>
+                        <p>Contacta al administrador para agregar productos</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="carrito-section">
+            <div class="carrito-header">
+                <h2>🛒 Carrito</h2>
+                <div id="total-items" class="total-items">0 productos</div>
+            </div>
+            
+            <div class="carrito-items" id="carrito-items">
+                <p class="text-center text-muted">El carrito está vacío</p>
+            </div>
+            
+            <div class="carrito-resumen">
+                <div class="resumen-fila">
+                    <span>Subtotal:</span>
+                    <span id="subtotal">$0.00</span>
+                </div>
+                <div class="resumen-fila">
+                    <span>IVA (0%):</span>
+                    <span>$0.00</span>
+                </div>
+                <div class="resumen-total">
+                    <span>Total:</span>
+                    <span id="total">$0.00</span>
+                </div>
+            </div>
+            
+            <div class="carrito-acciones">
+                <button id="btn-vaciar" class="btn-vaciar">Vaciar</button>
+                <button id="btn-pagar" class="btn-pagar" disabled>PAGAR</button>
+            </div>
+        </section>
+    </main>
+
+    <script src="{% static 'js/pos.js' %}"></script>
+</body>
+</html>

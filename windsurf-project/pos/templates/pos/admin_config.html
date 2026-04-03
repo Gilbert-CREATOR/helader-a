@@ -1,0 +1,319 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuración - Administración SPLASH</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <span>SPLASH</span>
+            </div>
+            <div class="user-info">
+                <span>{{ user.username }} - Administrador</span>
+                <a href="{% url 'pos:logout' %}" class="btn-logout">Cerrar Sesión</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="admin-container">
+        <div class="admin-header">
+            <h1>⚙️ Configuración del Sistema</h1>
+            <nav class="admin-nav">
+                <a href="{% url 'pos:admin_dashboard' %}">Dashboard</a>
+                <a href="{% url 'pos:admin_ventas' %}">💰 Ventas</a>
+                <a href="{% url 'pos:admin_productos' %}">📦 Inventario</a>
+                <a href="{% url 'pos:admin_config' %}" class="active">⚙️ Configuración</a>
+            </nav>
+        </div>
+
+        <!-- Gestión de Usuarios -->
+        <div class="table-container" style="margin-bottom: 2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h2>👥 Gestión de Usuarios</h2>
+                <button onclick="mostrarFormularioUsuario()" class="btn-login" style="padding: 0.75rem 1.5rem;">
+                    ➕ Agregar Usuario
+                </button>
+            </div>
+            
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Usuario</th>
+                        <th>Email</th>
+                        <th>Rol</th>
+                        <th>Teléfono</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for usuario in usuarios %}
+                        <tr>
+                            <td><strong>{{ usuario.username }}</strong></td>
+                            <td>{{ usuario.email|default:"Sin email" }}</td>
+                            <td>
+                                {% if usuario.rol == 'administrador' %}
+                                    <span style="color: var(--splash-blue-dark); font-weight: bold;">👑 Administrador</span>
+                                {% else %}
+                                    <span style="color: var(--splash-blue-dark); font-weight: bold;">🛒 Empleado</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ usuario.telefono|default:"Sin teléfono" }}</td>
+                            <td>
+                                {% if usuario.is_active %}
+                                    <span style="color: #4caf50; font-weight: bold;">✓ Activo</span>
+                                {% else %}
+                                    <span style="color: var(--splash-red); font-weight: bold;">✗ Inactivo</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <button onclick="editarUsuario({{ usuario.id }})" class="btn-login" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">
+                                    ✏️ Editar
+                                </button>
+                                {% if usuario.username != 'admin' %}
+                                    <button onclick="eliminarUsuario({{ usuario.id }})" class="btn-vaciar" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; margin-left: 0.25rem;">
+                                        �️ Eliminar
+                                    </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" style="text-align: center;">No hay usuarios registrados</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Configuración de la Tienda -->
+        <div class="table-container" style="margin-bottom: 2rem;">
+            <h2>🏪 Configuración de la Tienda</h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-top: 1rem;">
+                <div style="background: var(--gray-light); padding: 1.5rem; border-radius: 10px;">
+                    <h3>📄 Información Básica</h3>
+                    <form style="margin-top: 1rem;">
+                        <div class="form-group">
+                            <label>Nombre de la Tienda:</label>
+                            <input type="text" value="SPLASH Heladería" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px;">
+                        </div>
+                        <div class="form-group">
+                            <label>Dirección:</label>
+                            <input type="text" placeholder="Dirección de la tienda" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px;">
+                        </div>
+                        <div class="form-group">
+                            <label>Teléfono:</label>
+                            <input type="tel" placeholder="Teléfono de contacto" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px;">
+                        </div>
+                    </form>
+                </div>
+
+                <div style="background: var(--gray-light); padding: 1.5rem; border-radius: 10px;">
+                    <h3>💳 Métodos de Pago</h3>
+                    <form style="margin-top: 1rem;">
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: flex; align-items: center;">
+                                <input type="checkbox" checked style="margin-right: 0.5rem;">
+                                Efectivo (Habilitado)
+                            </label>
+                        </div>
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: flex; align-items: center;">
+                                <input type="checkbox" disabled style="margin-right: 0.5rem;">
+                                Tarjeta de Crédito (Próximamente)
+                            </label>
+                        </div>
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: flex; align-items: center;">
+                                <input type="checkbox" disabled style="margin-right: 0.5rem;">
+                                Transferencia (Próximamente)
+                            </label>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Configuración de Tickets -->
+        <div class="table-container">
+            <h2>🧾 Configuración de Tickets</h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-top: 1rem;">
+                <div style="background: var(--gray-light); padding: 1.5rem; border-radius: 10px;">
+                    <h3>🖨️ Impresión</h3>
+                    <form style="margin-top: 1rem;">
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: flex; align-items: center;">
+                                <input type="checkbox" checked style="margin-right: 0.5rem;">
+                                Imprimir ticket automáticamente
+                            </label>
+                        </div>
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: flex; align-items: center;">
+                                <input type="checkbox" checked style="margin-right: 0.5rem;">
+                                Mostrar vista previa
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label>Tamaño de papel:</label>
+                            <select style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px;">
+                                <option>58mm (Térmico estándar)</option>
+                                <option>80mm (Térmico grande)</option>
+                                <option>A4 (Carta)</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+
+                <div style="background: var(--gray-light); padding: 1.5rem; border-radius: 10px;">
+                    <h3>📝 Contenido del Ticket</h3>
+                    <form style="margin-top: 1rem;">
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: flex; align-items: center;">
+                                <input type="checkbox" checked style="margin-right: 0.5rem;">
+                                Mostrar logo y nombre
+                            </label>
+                        </div>
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: flex; align-items: center;">
+                                <input type="checkbox" checked style="margin-right: 0.5rem;">
+                                Mostrar fecha y hora
+                            </label>
+                        </div>
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: flex; align-items: center;">
+                                <input type="checkbox" checked style="margin-right: 0.5rem;">
+                                Mostrar nombre del cajero
+                            </label>
+                        </div>
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: flex; align-items: center;">
+                                <input type="checkbox" checked style="margin-right: 0.5rem;">
+                                Mensaje de agradecimiento
+                            </label>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div style="margin-top: 2rem; text-align: center;">
+            <button onclick="guardarConfiguracion()" class="btn-pagar" style="padding: 1rem 2rem; margin-right: 1rem;">
+                💾 Guardar Configuración
+            </button>
+            <button onclick="restaurarConfiguracion()" class="btn-vaciar" style="padding: 1rem 2rem;">
+                🔄 Restaurar Valores por Defecto
+            </button>
+        </div>
+    </main>
+
+    <!-- Modal para Agregar/Editar Usuario -->
+    <div id="modalUsuario" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 2rem; border-radius: 10px; width: 90%; max-width: 500px;">
+            <h3 id="tituloModal">➕ Agregar Usuario</h3>
+            <form id="formUsuario" style="margin-top: 1rem;">
+                <div class="form-group">
+                    <label>Nombre de Usuario:</label>
+                    <input type="text" id="username" required style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px;">
+                </div>
+                <div class="form-group">
+                    <label>Email:</label>
+                    <input type="email" id="email" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px;">
+                </div>
+                <div class="form-group">
+                    <label>Contraseña:</label>
+                    <input type="password" id="password" required style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px;">
+                </div>
+                <div class="form-group">
+                    <label>Rol:</label>
+                    <select id="rol" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px;">
+                        <option value="empleado">🛒 Empleado</option>
+                        <option value="administrador">👑 Administrador</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Teléfono:</label>
+                    <input type="tel" id="telefono" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px;">
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                    <button type="submit" class="btn-pagar" style="flex: 1;">Guardar</button>
+                    <button type="button" onclick="cerrarModal()" class="btn-vaciar" style="flex: 1;">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function mostrarFormularioUsuario() {
+            document.getElementById('tituloModal').textContent = '➕ Agregar Usuario';
+            document.getElementById('formUsuario').reset();
+            document.getElementById('modalUsuario').style.display = 'block';
+        }
+
+        function editarUsuario(usuarioId) {
+            document.getElementById('tituloModal').textContent = '✏️ Editar Usuario';
+            // Aquí cargar datos del usuario
+            document.getElementById('modalUsuario').style.display = 'block';
+        }
+
+        function cerrarModal() {
+            document.getElementById('modalUsuario').style.display = 'none';
+        }
+
+        function eliminarUsuario(usuarioId) {
+            if (confirm('¿Estás seguro de que quieres eliminar este usuario? Esta acción no se puede deshacer.')) {
+                fetch(`/admin/config/eliminar/${usuarioId}/`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        location.reload();
+                    } else {
+                        alert(data.message || 'Error al eliminar usuario');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error al eliminar usuario');
+                });
+            }
+        }
+
+        function toggleUsuario(usuarioId) {
+            if (confirm('¿Estás seguro de cambiar el estado de este usuario?')) {
+                // Aquí implementar toggle
+                location.reload();
+            }
+        }
+
+        function guardarConfiguracion() {
+            alert('Configuración guardada exitosamente');
+        }
+
+        function restaurarConfiguracion() {
+            if (confirm('¿Estás seguro de restaurar los valores por defecto?')) {
+                location.reload();
+            }
+        }
+
+        // Cerrar modal al hacer clic fuera
+        document.getElementById('modalUsuario').addEventListener('click', function(e) {
+            if (e.target === this) {
+                cerrarModal();
+            }
+        });
+    </script>
+</body>
+</html>
